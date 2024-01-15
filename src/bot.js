@@ -1,9 +1,13 @@
 import "dotenv/config";
-import { Client, GatewayIntentBits, Partials, ActivityType } from "discord.js";
+import {
+  Client,
+  GatewayIntentBits,
+  Partials,
+  ActivityType,
+  PermissionFlagsBits,
+} from "discord.js";
 import * as Sentry from "@sentry/node";
-import getLogsChannel from "./library/getLogsChannel.js";
 import messageGuildOwner from "./library/messageGuildOwner.js";
-import { increment } from "./controllers/mongodb.js";
 
 // initialize Sentry if we have a DSN
 if (process.env.SENTRY_DSN)
@@ -648,13 +652,39 @@ discord.login(process.env.DISCORD_BOT_TOKEN);
  * @returns {Promise<import("discord.js").Message>}
  */
 async function logJSON(guild, type, data) {
-  // increment the log count for this guild
-  await increment("stats", { key: "logJSON_invocations" }, { value: 1 });
-
-  const logsChannel = await getLogsChannel(guild);
+  // get the logs channel "bb-logs"
+  const logsChannel = guild.channels.cache.find(
+    (channel) => channel.name === "bb-logs"
+  );
 
   // if the logs channel doesn't exist, quit
-  if (!logsChannel) return;
+  if (!logsChannel)
+    return console.error(
+      `No bb-logs channel found in "${guild.name}" (${guild.id})`
+    );
+
+  // if the logs channel is partial, fetch it
+  if (logsChannel.partial) await logsChannel.fetch();
+
+  // do we have the required permissions for the logs channel?
+  const requiredLogsChannelPermissions = [
+    PermissionFlagsBits.SendMessages,
+    PermissionFlagsBits.AttachFiles,
+  ];
+
+  const missingPermissions = requiredLogsChannelPermissions.filter(
+    (permission) => !logsChannel.permissionsFor(guild.me).has(permission)
+  );
+
+  // if we're missing permissions, quit
+  if (missingPermissions.length > 0)
+    return console.error(
+      `Missing permissions in "${guild.name}" (${
+        guild.id
+      }): ${missingPermissions
+        .map((permission) => `\`${permission}\``)
+        .join(", ")}`
+    );
 
   // scrape data recursively for secrets
   data = (() => {
@@ -663,7 +693,6 @@ async function logJSON(guild, type, data) {
       process.env.DISCORD_APPLICATION_ID,
       process.env.DISCORD_BOT_TOKEN,
       process.env.DISCORD_DEVELOPMENT_GUILD_ID,
-      process.env.MONGODB_URI,
       process.env.SENTRY_DSN,
     ];
 
