@@ -12,3 +12,7 @@ You have two options for using this bot:
 
 1. **RECOMMENDED:** Clone this repository and run it yourself using Docker or something like PM2.
 2. Invite the public instance (A.K.A. "Big Brother") to your server by using this link: https://discord.com/api/oauth2/authorize?client_id=1124895077785944144&permissions=67210288&scope=bot%20applications.commands
+
+## Support
+
+If you need help with this bot, please join my [Discord server](https://zue.dev/discord) and ask in the `#support` channel.
