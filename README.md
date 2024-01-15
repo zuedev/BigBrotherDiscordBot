@@ -4,7 +4,7 @@
 
 > Powerful and complete replacement for Discord's built-in audit log.
 
-**"Big Brother"\_** is a configurable Discord bot that logs events in a Discord server to a channel. It is intended to be used as a more powerful alternative to Discord's built-in audit log.
+**"Big Brother"** is a configurable Discord bot that logs events in a Discord server to a channel. It is intended to be used as a more powerful alternative to Discord's built-in audit log.
 
 ## Usage
 
