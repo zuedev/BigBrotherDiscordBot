@@ -2,7 +2,7 @@ import { SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
 
 const command = new SlashCommandBuilder()
   .setName("help")
-  .setDescription("Shows the help menu for this bot.")
+  .setDescription("Tries to help you with the bot")
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 /**
@@ -13,61 +13,46 @@ const command = new SlashCommandBuilder()
  * @returns {Promise<import("discord.js").Message>}
  */
 const execute = async (interaction) => {
-  // check if we have a bb-logs channel
+  // defer the reply to let the user know we're working on it
+  await interaction.deferReply();
+
+  // start of help message
+  let helpMessage = "# Big Brother Bot Help";
+  helpMessage += "\n\n";
+
+  // attempt some troubleshooting
+  helpMessage += "## Automated Troubleshooting";
+  helpMessage += "\n\n";
+  helpMessage +=
+    "I'm going to try to help you troubleshoot your problem automatically.";
+  helpMessage += "\n\n";
+
+  // is there a bb-logs channel?
   const logsChannel = interaction.guild.channels.cache.find(
     (channel) => channel.name === "bb-logs"
   );
 
-  // if we don't have a bb-logs channel, tell the user to create one in the reply
   if (!logsChannel) {
-    return interaction.reply({
-      content:
-        "Please create a channel named `bb-logs` and try this command again.",
-      ephemeral: true,
-    });
+    helpMessage += "> ### ⚠️ Error: Missing channel!";
+    helpMessage += "\n";
+    helpMessage +=
+      "> I can't find a channel named `bb-logs`. Please create one that I can view and send messages in and try again.";
+    helpMessage += "\n\n";
+  } else {
+    helpMessage += "> ### ✅ Success: Troubleshooting complete!";
+    helpMessage += "\n";
+    helpMessage += "> I wasn't able to find any problems myself. Yay! 🎉";
+    helpMessage += "\n\n";
   }
 
-  // minimum permissions for the logs channel
-  const requiredLogsChannelPermissions = [
-    PermissionFlagsBits.SendMessages,
-    PermissionFlagsBits.AttachFiles,
-  ];
+  // always place generic support message at the end of the help message
+  helpMessage += "## Further Support";
+  helpMessage += `\n\n`;
+  helpMessage +=
+    "If you need more help, please join the [Discord server](<https://zue.dev/discord>) and ask in the `#support` channel.";
 
-  // optional permissions for the server (needed for some events)
-  const optionalServerPermissions = [
-    PermissionFlagsBits.ManageGuild, // needed by autoModerationAction* events
-    PermissionFlagsBits.ManageChannels, // needed by invite* events
-  ];
-
-  const missingPermissions = requiredLogsChannelPermissions.filter(
-    (permission) =>
-      !logsChannel.permissionsFor(interaction.guild.me).has(permission)
-  );
-
-  // if we're missing permissions, tell the user to fix it
-  if (missingPermissions.length > 0) {
-    return interaction.reply({
-      content: `Please give me the following permissions in the \`bb-logs\` channel: ${missingPermissions
-        .map((permission) => `\`${permission}\``)
-        .join(", ")}`,
-      ephemeral: true,
-    });
-  }
-
-  // do we have the optional permissions for the logs channel?
-  const optionalMissingPermissions = optionalServerPermissions.filter(
-    (permission) => !interaction.guild.me.permissions.has(permission)
-  );
-
-  // if we're missing permissions, tell the user that some features won't work
-  if (optionalMissingPermissions.length > 0) {
-    await interaction.reply({
-      content: `I'm missing the following permissions in this server: ${optionalMissingPermissions
-        .map((permission) => `\`${permission}\``)
-        .join(", ")}. Some features may not work.`,
-      ephemeral: true,
-    });
-  }
+  // send the help message
+  await interaction.editReply(helpMessage);
 };
 
 export default {
