@@ -1,0 +1,9 @@
+# Changelog
+
+## `v0.0.0` - Initial development
+
+```diff
++ Basic gateway-to-channel logging (messages, reactions, etc.)
++ Draft Terraform configuration for deploying to MongoDB Atlas
++ Basic Dockerfile runtime configuration
+```
