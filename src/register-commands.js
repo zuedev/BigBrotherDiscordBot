@@ -3,7 +3,7 @@ import { REST, Routes } from "discord.js";
 import fs from "fs";
 
 const rest = new REST({ version: "10" }).setToken(
-  process.env.DISCORD_BOT_TOKEN
+  process.env.DISCORD_BOT_TOKEN,
 );
 
 await (async () => {
@@ -26,11 +26,11 @@ await (async () => {
       await rest.put(
         Routes.applicationGuildCommands(
           process.env.DISCORD_APPLICATION_ID,
-          process.env.DISCORD_DEVELOPMENT_GUILD_ID
+          process.env.DISCORD_DEVELOPMENT_GUILD_ID,
         ),
         {
           body: interactions,
-        }
+        },
       );
 
       console.log("Successfully registered development guild commands.");
@@ -39,7 +39,7 @@ await (async () => {
         Routes.applicationCommands(process.env.DISCORD_APPLICATION_ID),
         {
           body: interactions,
-        }
+        },
       );
 
       console.log("Successfully registered application commands.");

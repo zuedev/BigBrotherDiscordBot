@@ -152,13 +152,13 @@ discord.login(process.env.DISCORD_BOT_TOKEN);
 async function logJSON(guild, type, data) {
   // get the logs channel "bb-logs"
   const logsChannel = guild.channels.cache.find(
-    (channel) => channel.name === "bb-logs"
+    (channel) => channel.name === "bb-logs",
   );
 
   // if the logs channel doesn't exist, quit
   if (!logsChannel)
     return console.error(
-      `No bb-logs channel found in "${guild.name}" (${guild.id})`
+      `No bb-logs channel found in "${guild.name}" (${guild.id})`,
     );
 
   // if the logs channel is partial, fetch it
@@ -172,7 +172,7 @@ async function logJSON(guild, type, data) {
 
   const missingPermissions = requiredLogsChannelPermissions.filter(
     (permission) =>
-      !logsChannel.permissionsFor(guild.members.me)?.has(permission)
+      !logsChannel.permissionsFor(guild.members.me)?.has(permission),
   );
 
   // if we're missing permissions, quit
@@ -182,7 +182,7 @@ async function logJSON(guild, type, data) {
         guild.id
       }): ${missingPermissions
         .map((permission) => `\`${permission}\``)
-        .join(", ")}`
+        .join(", ")}`,
     );
 
   // scrape data recursively for secrets
@@ -195,7 +195,7 @@ async function logJSON(guild, type, data) {
       if (!secret) continue;
 
       clean = JSON.parse(
-        JSON.stringify(clean).replace(new RegExp(secret, "gi"), "[SECRET]")
+        JSON.stringify(clean).replace(new RegExp(secret, "gi"), "[SECRET]"),
       );
     }
 

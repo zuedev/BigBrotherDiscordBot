@@ -10,7 +10,7 @@ import getApplicationOwner from "./getApplicationOwner.js";
  */
 export default async function messageApplicationOwner(
   client,
-  messageCreateOptions
+  messageCreateOptions,
 ) {
   const applicationOwner = await getApplicationOwner(client);
 

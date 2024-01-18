@@ -29,7 +29,7 @@ const execute = async (interaction) => {
 
   // is there a bb-logs channel?
   const logsChannel = interaction.guild.channels.cache.find(
-    (channel) => channel.name === "bb-logs"
+    (channel) => channel.name === "bb-logs",
   );
 
   if (!logsChannel) {
@@ -52,7 +52,7 @@ const execute = async (interaction) => {
       (permission) =>
         !logsChannel
           .permissionsFor(logsChannel.guild.members.me)
-          ?.has(permission)
+          ?.has(permission),
     );
 
     if (missingRequiredPermissions.length > 0) {
@@ -86,7 +86,7 @@ const execute = async (interaction) => {
 
       const missingOptionalPermissions = optionalServerPermissions.filter(
         (permission) =>
-          !logsChannel.guild.members.me.permissions?.has(permission)
+          !logsChannel.guild.members.me.permissions?.has(permission),
       );
 
       if (missingOptionalPermissions.length > 0) {
