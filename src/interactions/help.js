@@ -1,10 +1,8 @@
 import { SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
 
-import getLogsChannel from "../library/getLogsChannel.js";
-
 const command = new SlashCommandBuilder()
   .setName("help")
-  .setDescription("Shows the help menu for this bot.")
+  .setDescription("Tries to help you with the bot")
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 /**
@@ -15,115 +13,121 @@ const command = new SlashCommandBuilder()
  * @returns {Promise<import("discord.js").Message>}
  */
 const execute = async (interaction) => {
-  // double-check that the user is an admin
-  if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator))
-    return await interaction.reply({
-      content: "You must be an administrator to use this command!",
-      ephemeral: true,
-    });
+  // defer the reply to let the user know we're working on it
+  await interaction.deferReply();
 
-  // do we have the expected minimum server permissions?
-  const expectedPermissionsFlags = [
-    PermissionFlagsBits.ViewChannel,
-    PermissionFlagsBits.SendMessages,
-    PermissionFlagsBits.AttachFiles,
-    PermissionFlagsBits.ReadMessageHistory,
-    PermissionFlagsBits.ManageGuild, // needed by autoModerationAction* events
-    PermissionFlagsBits.ManageChannels, // needed by invite* events
-    PermissionFlagsBits.ChangeNickname,
-  ];
+  // start of help message
+  let helpMessage = "# Big Brother Bot Help";
+  helpMessage += "\n\n";
 
-  let missingPermissions = expectedPermissionsFlags.filter(
-    (permission) =>
-      !interaction.guild.members.cache
-        .get(interaction.client.user.id)
-        .permissions.has(permission)
+  // attempt some troubleshooting
+  helpMessage += "## Automated Troubleshooting";
+  helpMessage += "\n\n";
+  helpMessage +=
+    "I'm going to try to help you troubleshoot your problem automatically.";
+  helpMessage += "\n\n";
+
+  // is there a bb-logs channel?
+  const logsChannel = interaction.guild.channels.cache.find(
+    (channel) => channel.name === "bb-logs",
   );
 
-  if (missingPermissions.length > 0) {
-    // add the missing permissions descriptions
-    missingPermissions = missingPermissions.map((permission) => {
-      switch (permission) {
-        case PermissionFlagsBits.ViewChannel:
-          return "View Channel";
-        case PermissionFlagsBits.SendMessages:
-          return "Send Messages";
-        case PermissionFlagsBits.AttachFiles:
-          return "Attach Files";
-        case PermissionFlagsBits.ReadMessageHistory:
-          return "Read Message History";
-        case PermissionFlagsBits.ManageGuild:
-          return "Manage Server";
-        case PermissionFlagsBits.ManageChannels:
-          return "Manage Channels";
-        case PermissionFlagsBits.ChangeNickname:
-          return "Change Nickname";
-        default:
-          return "Unknown Permission";
+  if (!logsChannel) {
+    helpMessage += "> ### ⚠️ Error: Missing channel!";
+    helpMessage += "\n";
+    helpMessage +=
+      "> I can't find a channel named `bb-logs`. Please create one that I can view, send messages, and attach files in then try again.";
+    helpMessage += "\n\n";
+  } else {
+    // if the logs channel is partial, fetch it
+    if (logsChannel.partial) await logsChannel.fetch();
+
+    // do we have the required permissions for the logs channel?
+    const requiredLogsChannelPermissions = [
+      PermissionFlagsBits.SendMessages,
+      PermissionFlagsBits.AttachFiles,
+    ];
+
+    const missingRequiredPermissions = requiredLogsChannelPermissions.filter(
+      (permission) =>
+        !logsChannel
+          .permissionsFor(logsChannel.guild.members.me)
+          ?.has(permission),
+    );
+
+    if (missingRequiredPermissions.length > 0) {
+      // convert the missing permissions to a human-readable list
+      const missingRequiredPermissionsReadable = missingRequiredPermissions
+        .map((permission) => {
+          switch (permission) {
+            case PermissionFlagsBits.SendMessages:
+              return "> - **Send Messages**";
+            case PermissionFlagsBits.AttachFiles:
+              return "> - **Attach Files**";
+            default:
+              throw new Error(`Unknown permission: ${permission}`);
+          }
+        })
+        .join("\n");
+
+      helpMessage += "> ### ⚠️ Error: Missing required channel permissions!";
+      helpMessage += "\n";
+      helpMessage +=
+        "> I'm missing some permissions in the `bb-logs` channel. Please give me the following permissions and try again:";
+      helpMessage += "\n";
+      helpMessage += `${missingRequiredPermissionsReadable}`;
+      helpMessage += "\n\n";
+    } else {
+      // do we have the optional permissions for the server?
+      const optionalServerPermissions = [
+        PermissionFlagsBits.ManageGuild, // needed by autoModerationAction* events
+        PermissionFlagsBits.ManageChannels, // needed by invite* events
+      ];
+
+      const missingOptionalPermissions = optionalServerPermissions.filter(
+        (permission) =>
+          !logsChannel.guild.members.me.permissions?.has(permission),
+      );
+
+      if (missingOptionalPermissions.length > 0) {
+        // convert the missing permissions to a human-readable list
+        const missingOptionalPermissionsReadable = missingOptionalPermissions
+          .map((permission) => {
+            switch (permission) {
+              case PermissionFlagsBits.ManageGuild:
+                return "> - **Manage Server:** [Needed by `autoModerationAction*` events](<https://discord.com/developers/docs/topics/gateway-events#auto-moderation-rule-create:~:text=All%20Auto%20Moderation,permission.>)";
+              case PermissionFlagsBits.ManageChannels:
+                return "> - **Manage Channels:** [Needed by `invite*` events](<https://discord.com/developers/docs/topics/gateway-events#invite-create:~:text=All%20Invite%20related,on%20the%20channel.>)";
+              default:
+                throw new Error(`Unknown permission: ${permission}`);
+            }
+          })
+          .join("\n");
+
+        helpMessage += "> ### ℹ️ Warning: Missing optional server permissions!";
+        helpMessage += "\n";
+        helpMessage +=
+          "> I'm missing some permissions in this server. These permissions are optional, but I recommend giving them to me so I can do my job better:";
+        helpMessage += "\n";
+        helpMessage += `${missingOptionalPermissionsReadable}`;
+        helpMessage += "\n\n";
+      } else {
+        helpMessage += "> ### ✅ Success: Troubleshooting complete!";
+        helpMessage += "\n";
+        helpMessage += "> I wasn't able to find any problems myself. Yay! 🎉";
+        helpMessage += "\n\n";
       }
-    });
-
-    // create a new link to the bot's invite URL with the required permissions
-    const inviteURL = `https://discord.com/oauth2/authorize?client_id=${
-      interaction.client.user.id
-    }&scope=bot&permissions=${expectedPermissionsFlags.reduce(
-      (total, permission) => total + permission,
-      BigInt(0)
-    )}`;
-
-    let message = `I'm missing the following server permissions:\n- ${missingPermissions.join(
-      "\n- "
-    )}`;
-
-    message += `\n\nPlease use this link to invite me to your server with the required permissions:\n${inviteURL}`;
-
-    // we're missing some permissions, so let the user know
-    return await interaction.reply({
-      content: message,
-      ephemeral: true,
-    });
+    }
   }
 
-  // permissions look good, now check if we have a logs channel
-  const logsChannel = await getLogsChannel(interaction.guild);
+  // always place generic support message at the end of the help message
+  helpMessage += "## Further Support";
+  helpMessage += `\n\n`;
+  helpMessage +=
+    "If you need more help, please join the [Discord server](<https://zue.dev/discord>) and ask in the `#support` channel.";
 
-  if (!logsChannel)
-    return await interaction.reply({
-      content:
-        "I couldn't find a logs channel. Please use `/setup` to create one.",
-      ephemeral: true,
-    });
-
-  // we have a logs channel, so show the help menu
-  return await interaction.reply({
-    embeds: [
-      {
-        title: "Help Menu",
-        description:
-          "This bot is designed to help you keep track of your server's gateway events. To get started, use `/setup` to create a logs channel.",
-        fields: [
-          {
-            name: "Commands",
-            value: [
-              "`/setup` - Creates a logs channel for this server.",
-              "`/help` - Shows this help menu.",
-            ].join("\n"),
-          },
-          {
-            name: "Permissions",
-            value: [
-              "This bot requires the following permissions to work properly:",
-              "- View Channel",
-              "- Send Messages",
-              "- Attach Files",
-              "- Read Message History",
-            ].join("\n"),
-          },
-        ],
-      },
-    ],
-    ephemeral: true,
-  });
+  // send the help message
+  await interaction.editReply(helpMessage);
 };
 
 export default {
