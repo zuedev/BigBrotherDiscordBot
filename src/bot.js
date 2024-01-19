@@ -6,9 +6,11 @@ import {
   ActivityType,
   PermissionFlagsBits,
   Events,
+  ChannelType,
 } from "discord.js";
 import { execSync } from "child_process";
 import messageApplicationOwner from "./library/messageApplicationOwner.js";
+import { Channel } from "diagnostics_channel";
 
 const discord = new Client({
   intents: [...Object.values(GatewayIntentBits)],
@@ -16,7 +18,9 @@ const discord = new Client({
 });
 
 discord.on(Events.ClientReady, async () => {
-  const gitCommitHash = execSync("git rev-parse HEAD").toString().trim();
+  const gitCommitHash = execSync("git rev-parse --short HEAD")
+    .toString()
+    .trim();
 
   discord.user.setActivity(`/help | v${gitCommitHash}`, {
     type: ActivityType.Listening,
@@ -152,14 +156,13 @@ discord.login(process.env.DISCORD_BOT_TOKEN);
 async function logJSON(guild, type, data) {
   // get the logs channel "bb-logs"
   const logsChannel = guild.channels.cache.find(
-    (channel) => channel.name === "bb-logs",
+    (channel) =>
+      channel.type === ChannelType.GuildText &&
+      (channel.name === "bb-logs" || channel.name === "dlb-logs")
   );
 
   // if the logs channel doesn't exist, quit
-  if (!logsChannel)
-    return console.error(
-      `No bb-logs channel found in "${guild.name}" (${guild.id})`,
-    );
+  if (!logsChannel) return;
 
   // if the logs channel is partial, fetch it
   if (logsChannel.partial) await logsChannel.fetch();
@@ -172,7 +175,7 @@ async function logJSON(guild, type, data) {
 
   const missingPermissions = requiredLogsChannelPermissions.filter(
     (permission) =>
-      !logsChannel.permissionsFor(guild.members.me)?.has(permission),
+      !logsChannel.permissionsFor(guild.members.me)?.has(permission)
   );
 
   // if we're missing permissions, quit
@@ -182,7 +185,7 @@ async function logJSON(guild, type, data) {
         guild.id
       }): ${missingPermissions
         .map((permission) => `\`${permission}\``)
-        .join(", ")}`,
+        .join(", ")}`
     );
 
   // scrape data recursively for secrets
@@ -195,7 +198,7 @@ async function logJSON(guild, type, data) {
       if (!secret) continue;
 
       clean = JSON.parse(
-        JSON.stringify(clean).replace(new RegExp(secret, "gi"), "[SECRET]"),
+        JSON.stringify(clean).replace(new RegExp(secret, "gi"), "[SECRET]")
       );
     }
 
@@ -204,13 +207,22 @@ async function logJSON(guild, type, data) {
 
   const json = JSON.stringify(data, null, 2);
 
+  let append = false;
+
+  // if the logs channel is named "dlb-logs", append a message warning about the name change
+  if (logsChannel.name === "dlb-logs")
+    append =
+      "\n\n:warning: **WARNING:** This channel should be renamed to `bb-logs` instead of `dlb-logs` to avoid issues with the bot in the future.\n\n";
+
   // is the data more than 2000 characters?
   if (json.length > 2000) {
     // send a file instead
     const buffer = Buffer.from(json);
 
     return await logsChannel.send({
-      content: `**logJSON/${type}** _(output too long, sent as file)_`,
+      content: `**logJSON/${type}** _(output too long, sent as file)_${
+        append ? append : ""
+      }\n`,
       files: [
         {
           attachment: buffer,
@@ -220,7 +232,7 @@ async function logJSON(guild, type, data) {
     });
   } else {
     // otherwise, send a message
-    let message = `**logJSON/${type}**\n`;
+    let message = `**logJSON/${type}**${append ? append : ""}\n`;
     message += "```json\n";
     message += json;
     message += "\n```";

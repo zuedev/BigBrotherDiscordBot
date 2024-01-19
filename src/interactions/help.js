@@ -1,4 +1,8 @@
-import { SlashCommandBuilder, PermissionFlagsBits } from "discord.js";
+import {
+  SlashCommandBuilder,
+  PermissionFlagsBits,
+  ChannelType,
+} from "discord.js";
 
 const command = new SlashCommandBuilder()
   .setName("help")
@@ -27,9 +31,11 @@ const execute = async (interaction) => {
     "I'm going to try to help you troubleshoot your problem automatically.";
   helpMessage += "\n\n";
 
-  // is there a bb-logs channel?
+  // is there a bb-logs text channel?
   const logsChannel = interaction.guild.channels.cache.find(
-    (channel) => channel.name === "bb-logs",
+    (channel) =>
+      channel.type === ChannelType.GuildText &&
+      (channel.name === "bb-logs" || channel.name === "dlb-logs")
   );
 
   if (!logsChannel) {
@@ -52,7 +58,7 @@ const execute = async (interaction) => {
       (permission) =>
         !logsChannel
           .permissionsFor(logsChannel.guild.members.me)
-          ?.has(permission),
+          ?.has(permission)
     );
 
     if (missingRequiredPermissions.length > 0) {
@@ -86,7 +92,7 @@ const execute = async (interaction) => {
 
       const missingOptionalPermissions = optionalServerPermissions.filter(
         (permission) =>
-          !logsChannel.guild.members.me.permissions?.has(permission),
+          !logsChannel.guild.members.me.permissions?.has(permission)
       );
 
       if (missingOptionalPermissions.length > 0) {
@@ -112,10 +118,19 @@ const execute = async (interaction) => {
         helpMessage += `${missingOptionalPermissionsReadable}`;
         helpMessage += "\n\n";
       } else {
-        helpMessage += "> ### ✅ Success: Troubleshooting complete!";
-        helpMessage += "\n";
-        helpMessage += "> I wasn't able to find any problems myself. Yay! 🎉";
-        helpMessage += "\n\n";
+        // warn about dlb-logs to bb-logs migration
+        if (logsChannel.name === "dlb-logs") {
+          helpMessage += "> ### ℹ️ Warning: dlb-logs to bb-logs migration";
+          helpMessage += "\n";
+          helpMessage +=
+            "> I've detected that you're using the old `dlb-logs` channel. Please rename it to `bb-logs` to avoid any issues with the bot in the future.";
+          helpMessage += "\n\n";
+        } else {
+          helpMessage += "> ### ✅ Success: Troubleshooting complete!";
+          helpMessage += "\n";
+          helpMessage += "> I wasn't able to find any problems myself. Yay! 🎉";
+          helpMessage += "\n\n";
+        }
       }
     }
   }
