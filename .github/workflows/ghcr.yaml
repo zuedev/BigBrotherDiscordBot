@@ -13,12 +13,6 @@ jobs:
       contents: read
       packages: write
     steps:
-      - name: get latest git version
-        run: |
-          sudo apt-get update
-          sudo apt-get install git
-          git --version
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -38,5 +32,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
+          context: .
+          file: ./Dockerfile
           push: true
           tags: ghcr.io/${{ env._z_reponame }}:latest
