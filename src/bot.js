@@ -70,20 +70,6 @@ discord.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-discord.on(Events.Error, (error) => {
-  console.error(error);
-
-  messageApplicationOwner(discord, {
-    content: `# Big Brother Bot Error Event`,
-    files: [
-      {
-        attachment: Buffer.from(error.stack),
-        name: "error_event.txt",
-      },
-    ],
-  });
-});
-
 // register event logging for all client events
 [
   Events.ApplicationCommandPermissionsUpdate,
