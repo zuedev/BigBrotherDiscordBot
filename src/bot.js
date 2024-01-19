@@ -70,6 +70,10 @@ discord.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
+discord.on(Events.Error, (error) => {
+  console.error(error);
+});
+
 // register event logging for all client events
 [
   Events.ApplicationCommandPermissionsUpdate,
