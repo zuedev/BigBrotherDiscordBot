@@ -25,6 +25,25 @@ discord.on(Events.ClientReady, async () => {
     type: ActivityType.Listening,
   });
 
+  await messageApplicationOwner(discord, {
+    content:
+      `# Big Brother Bot Ready Event` +
+      "\n```json\n" +
+      JSON.stringify(
+        {
+          gitCommitHash,
+          guilds: discord.guilds.cache.size,
+          users: discord.guilds.cache.reduce(
+            (accumulator, guild) => accumulator + guild.memberCount,
+            0
+          ),
+        },
+        null,
+        2
+      ) +
+      "\n```",
+  });
+
   console.log(`Logged in as ${discord.user.tag}!`);
 });
 
@@ -54,7 +73,7 @@ discord.on(Events.InteractionCreate, async (interaction) => {
 discord.on(Events.Error, (error) => {
   console.error(error);
 
-  messageApplicationOwner({
+  messageApplicationOwner(discord, {
     content: `# Big Brother Bot Error Event`,
     files: [
       {
