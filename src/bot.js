@@ -10,7 +10,6 @@ import {
 } from "discord.js";
 import { execSync } from "child_process";
 import messageApplicationOwner from "./library/messageApplicationOwner.js";
-import { Channel } from "diagnostics_channel";
 
 const discord = new Client({
   intents: [...Object.values(GatewayIntentBits)],
