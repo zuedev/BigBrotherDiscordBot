@@ -22,14 +22,14 @@ export async function connect() {
 }
 
 /**
- * Gets an object from the database.
+ * Finds an object in the database.
  *
  * @param {string} table The table to get from
  * @param {object} filter The filter to use
  *
  * @returns {Promise<object>} The object
  */
-export async function get(table, filter) {
+export async function findOne(table, filter) {
   const mongo = await connect();
 
   const data = await mongo.db().collection(table).findOne(filter);
@@ -40,30 +40,25 @@ export async function get(table, filter) {
 }
 
 /**
- * Increments an object in the database, or inserts it if it doesn't exist.
+ * Updates an object in the database.
  *
  * @param {string} table The table to update
  * @param {object} filter The filter to use
- * @param {object} object The object to increment
+ * @param {object} update The update to use
  *
- * @returns {Promise<object>} The updated object
- *
- * @example increment("users", { id: "123" }, { count: 1 });
+ * @returns {Promise<object>} The object
  */
-export async function increment(table, filter, object) {
+export async function updateOne(table, filter, update, options) {
   const mongo = await connect();
 
-  const data = await mongo.db().collection(table).updateMany(
-    filter,
-    {
-      $inc: object,
-    },
-    { upsert: true }
-  );
+  const data = await mongo
+    .db()
+    .collection(table)
+    .updateOne(filter, update, options);
 
   await mongo.close();
 
   return data;
 }
 
-export default { connect, get, increment };
+export default { connect, findOne, updateOne };

@@ -2,7 +2,7 @@
 
 ## 1. Acceptance of Terms
 
-By using Discord Logging Bot (A.K.A. "Big Brother") (the "Bot"), you are agreeing to these terms of service. If you do not agree to these terms, please do not use the Bot.
+By using "Big Brother" (the "Bot"), you are agreeing to these terms of service. If you do not agree to these terms, please do not use the Bot.
 
 ## 2. Description of Service
 

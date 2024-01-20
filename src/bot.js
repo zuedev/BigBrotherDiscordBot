@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import { execSync } from "child_process";
 import messageApplicationOwner from "./library/messageApplicationOwner.js";
-import { increment } from "./controllers/mongodb.js";
+import { updateOne } from "./controllers/mongodb.js";
 
 const discord = new Client({
   intents: [...Object.values(GatewayIntentBits)],
@@ -139,7 +139,7 @@ discord.on(Events.Error, (error) => {
   Events.WebhooksUpdate,
 ].forEach((event) => {
   discord.on(event, async (...args) => {
-    await increment("stats", { key: "GLOBAL" }, { eventsLogged: 1 });
+    await updateOne("stats", { key: "GLOBAL" }, { $inc: { eventsLogged: 1 } });
 
     // do we have a guild key in the args? Check recursively to support nested args
     let guild = false;
@@ -160,7 +160,28 @@ discord.on(Events.Error, (error) => {
 
     if (!guild) return;
 
-    await increment("stats", { key: `guild_${guild.id}` }, { eventsLogged: 1 });
+    // fetch guild if partial
+    if (guild.partial) await guild.fetch();
+
+    // also fetch guild owner
+    const guildOwner = await guild.fetchOwner();
+
+    await updateOne(
+      "stats",
+      { key: `guild_${guild.id}` },
+      {
+        $inc: { eventsLogged: 1 },
+        $set: {
+          lastKnown: {
+            guildName: guild.name,
+            guildMemberCount: guild.memberCount,
+            guildOwnerId: guildOwner.id,
+            guildOwnerTag: guildOwner.user.tag,
+          },
+        },
+      },
+      { upsert: true }
+    );
 
     for (const arg of args) {
       if (arg.partial) await arg.fetch();

@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "discord.js";
-import { get } from "../controllers/mongodb.js";
+import { findOne } from "../controllers/mongodb.js";
 
 const command = new SlashCommandBuilder()
   .setName("stats")
@@ -18,7 +18,7 @@ const execute = async (interaction) => {
     channels: interaction.client.channels.cache.size,
     users: interaction.client.users.cache.size,
     globalEventsLogged:
-      (await get("stats", { key: "GLOBAL" })).eventsLogged || 0,
+      (await findOne("stats", { key: "GLOBAL" })).eventsLogged || 0,
   };
 
   await interaction.reply({

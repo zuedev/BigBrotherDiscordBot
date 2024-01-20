@@ -2,11 +2,19 @@
 
 1. Introduction
 
-Thank you for choosing to use Discord Logging Bot (A.K.A. "Big Brother"). This privacy policy outlines our practices regarding the collection, use, and disclosure of information that we receive through Discord Logging Bot (A.K.A. "Big Brother"). This privacy policy applies to all users of Discord Logging Bot (A.K.A. "Big Brother").
+Thank you for choosing to use the "Big Brother" Discord bot. This privacy policy outlines our practices regarding the collection, use, and disclosure of information that we receive through "Big Brother". This privacy policy applies to all users of "Big Brother".
 
 2. Information Collection and Use
 
-As Discord Logging Bot (A.K.A. "Big Brother") is a Discord bot, all data collection, use, and storage is handled by Discord, Inc. We do not collect or store any personal data independently. For information about how Discord, Inc. collects and uses your information, please refer to [Discord's Privacy Policy](https://discord.com/privacy).
+As "Big Brother" is a Discord bot, further data collection, use, and storage is handled by Discord, Inc. For information about how Discord, Inc. collects and uses your information, please refer to [Discord's Privacy Policy](https://discord.com/privacy).
+
+We store the following information from your Discord data:
+
+- From each guild you add "Big Brother" to:
+  - The guild's ID, name, and member count
+  - The guild owner's ID and username
+
+We use this information to better understand how our users use "Big Brother" and to improve the bot.
 
 3. Changes to this Privacy Policy
 
