@@ -8,13 +8,7 @@ import { MongoClient, ServerApiVersion } from "mongodb";
  * @returns {Promise<MongoClient>} The connected MongoDB client
  */
 export async function connect() {
-  const mongo = new MongoClient(process.env.MONGODB_URI, {
-    serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true,
-    },
-  });
+  const mongo = new MongoClient(process.env.MONGODB_URI);
 
   await mongo.connect();
 
