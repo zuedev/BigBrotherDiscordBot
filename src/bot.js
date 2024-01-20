@@ -10,6 +10,7 @@ import {
 } from "discord.js";
 import { execSync } from "child_process";
 import messageApplicationOwner from "./library/messageApplicationOwner.js";
+import { increment } from "./controllers/mongodb.js";
 
 const discord = new Client({
   intents: [...Object.values(GatewayIntentBits)],
@@ -138,6 +139,8 @@ discord.on(Events.Error, (error) => {
   Events.WebhooksUpdate,
 ].forEach((event) => {
   discord.on(event, async (...args) => {
+    await increment("stats", { key: "eventsLogged" }, { count: 1 });
+
     const guild = args[0]?.guild;
 
     if (!guild) return;
