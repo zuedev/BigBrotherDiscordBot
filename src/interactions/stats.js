@@ -17,7 +17,8 @@ const execute = async (interaction) => {
     guilds: interaction.client.guilds.cache.size,
     channels: interaction.client.channels.cache.size,
     users: interaction.client.users.cache.size,
-    eventsLogged: (await get("stats", { key: "eventsLogged" })).count || 0,
+    globalEventsLogged:
+      (await get("stats", { key: "GLOBAL" })).eventsLogged || 0,
   };
 
   await interaction.reply({
