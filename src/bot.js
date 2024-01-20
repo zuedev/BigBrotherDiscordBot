@@ -139,7 +139,12 @@ discord.on(Events.Error, (error) => {
   Events.WebhooksUpdate,
 ].forEach((event) => {
   discord.on(event, async (...args) => {
-    await updateOne("stats", { key: "GLOBAL" }, { $inc: { eventsLogged: 1 } });
+    await updateOne(
+      "stats",
+      { key: "GLOBAL" },
+      { $inc: { eventsLogged: 1 } },
+      { upsert: true }
+    );
 
     // do we have a guild key in the args? Check recursively to support nested args
     let guild = false;
