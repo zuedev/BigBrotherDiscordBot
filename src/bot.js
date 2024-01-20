@@ -164,7 +164,7 @@ discord.on(Events.Error, (error) => {
       if (arg.partial) await arg.fetch();
     }
 
-    await logJSON(guild, "event", args);
+    await logJSON(guild, event, args);
   });
 });
 
@@ -238,7 +238,7 @@ async function logJSON(guild, type, data) {
   // if the logs channel is named "dlb-logs", append a message warning about the name change
   if (logsChannel.name === "dlb-logs")
     append =
-      "\n\n:warning: **WARNING:** This channel should be renamed to `bb-logs` instead of `dlb-logs` to avoid issues with the bot in the future.\n\n";
+      "\n:warning: **WARNING:** This channel should be renamed to `bb-logs` instead of `dlb-logs` to avoid issues with the bot in the future.\n";
 
   // is the data more than 2000 characters?
   if (json.length > 2000) {
@@ -246,9 +246,9 @@ async function logJSON(guild, type, data) {
     const buffer = Buffer.from(json);
 
     return await logsChannel.send({
-      content: `**logJSON/${type}** _(output too long, sent as file)_${
+      content: `# ${type}\n_(output too long, sent as file)_${
         append ? append : ""
-      }\n`,
+      }`,
       files: [
         {
           attachment: buffer,
@@ -258,7 +258,7 @@ async function logJSON(guild, type, data) {
     });
   } else {
     // otherwise, send a message
-    let message = `**logJSON/${type}**${append ? append : ""}\n`;
+    let message = `# ${type}\n${append ? append : ""}`;
     message += "```json\n";
     message += json;
     message += "\n```";
