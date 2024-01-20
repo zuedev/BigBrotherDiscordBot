@@ -141,7 +141,22 @@ discord.on(Events.Error, (error) => {
   discord.on(event, async (...args) => {
     await increment("stats", { key: "eventsLogged" }, { count: 1 });
 
-    const guild = args[0]?.guild;
+    // do we have a guild key in the args? Check recursively to support nested args
+    let guild = false;
+
+    for (const arg of args) {
+      if (arg.guild) {
+        guild = arg.guild;
+        break;
+      }
+
+      for (const key in arg) {
+        if (arg[key] && arg[key].guild) {
+          guild = arg[key].guild;
+          break;
+        }
+      }
+    }
 
     if (!guild) return;
 
