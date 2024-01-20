@@ -160,7 +160,14 @@ discord.on(Events.Error, (error) => {
 
     if (!guild) return;
 
-    await increment("stats", { key: `guild_${guild.id}` }, { eventsLogged: 1 });
+    await increment(
+      "stats",
+      { key: `guild_${guild.id}` },
+      {
+        guildName: guild.name,
+        eventsLogged: 1,
+      }
+    );
 
     for (const arg of args) {
       if (arg.partial) await arg.fetch();
