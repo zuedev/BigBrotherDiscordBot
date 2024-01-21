@@ -17,9 +17,11 @@ const execute = async (interaction) => {
     guilds: interaction.client.guilds.cache.size,
     channels: interaction.client.channels.cache.size,
     users: interaction.client.users.cache.size,
-    globalEventsLogged:
-      (await findOne("stats", { key: "GLOBAL" })).eventsLogged || 0,
   };
+
+  if (process.env.MONGODB_URI)
+    statsJson.globalEventsLogged =
+      (await findOne("stats", { key: "GLOBAL" }))?.eventsLogged || 0;
 
   await interaction.reply({
     content:

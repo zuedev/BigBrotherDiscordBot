@@ -139,12 +139,13 @@ discord.on(Events.Error, (error) => {
   Events.WebhooksUpdate,
 ].forEach((event) => {
   discord.on(event, async (...args) => {
-    await updateOne(
-      "stats",
-      { key: "GLOBAL" },
-      { $inc: { eventsLogged: 1 } },
-      { upsert: true }
-    );
+    if (process.env.MONGODB_URI)
+      await updateOne(
+        "stats",
+        { key: "GLOBAL" },
+        { $inc: { eventsLogged: 1 } },
+        { upsert: true }
+      );
 
     // do we have a guild key in the args? Check recursively to support nested args
     let guild = false;
@@ -168,25 +169,27 @@ discord.on(Events.Error, (error) => {
     // fetch guild if partial
     if (guild.partial) await guild.fetch();
 
-    // also fetch guild owner
-    const guildOwner = await guild.fetchOwner();
+    if (process.env.MONGODB_URI) {
+      // also fetch guild owner
+      const guildOwner = await guild.fetchOwner();
 
-    await updateOne(
-      "stats",
-      { key: `guild_${guild.id}` },
-      {
-        $inc: { eventsLogged: 1 },
-        $set: {
-          lastKnown: {
-            guildName: guild.name,
-            guildMemberCount: guild.memberCount,
-            guildOwnerId: guildOwner.id,
-            guildOwnerTag: guildOwner.user.tag,
+      await updateOne(
+        "stats",
+        { key: `guild_${guild.id}` },
+        {
+          $inc: { eventsLogged: 1 },
+          $set: {
+            lastKnown: {
+              guildName: guild.name,
+              guildMemberCount: guild.memberCount,
+              guildOwnerId: guildOwner.id,
+              guildOwnerTag: guildOwner.user.tag,
+            },
           },
         },
-      },
-      { upsert: true }
-    );
+        { upsert: true }
+      );
+    }
 
     for (const arg of args) {
       if (arg.partial) await arg.fetch();

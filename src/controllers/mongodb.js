@@ -1,4 +1,4 @@
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient } from "mongodb";
 
 /**
  * Connects to the database.
