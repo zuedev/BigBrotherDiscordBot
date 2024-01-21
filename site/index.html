@@ -61,6 +61,11 @@
       </p>
     </footer>
   </body>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai-sublime.min.css"
+  />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script>
     const statsOutput = document.getElementById("statsOutput");
 
@@ -68,7 +73,12 @@
       fetch("https://bigbrotherapi.zue.dev/stats")
         .then((res) => res.json())
         .then((data) => {
-          statsOutput.innerHTML = JSON.stringify(data, null, 2);
+          statsOutput.innerHTML = hljs.highlight(
+            JSON.stringify(data, null, 2),
+            {
+              language: "json",
+            }
+          ).value;
         });
     };
 
