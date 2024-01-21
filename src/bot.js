@@ -10,7 +10,9 @@ import {
 } from "discord.js";
 import { execSync } from "child_process";
 import messageApplicationOwner from "./library/messageApplicationOwner.js";
-import { updateOne } from "./controllers/mongodb.js";
+import { findOne, updateOne } from "./controllers/mongodb.js";
+import express from "express";
+import cors from "cors";
 
 const discord = new Client({
   intents: [...Object.values(GatewayIntentBits)],
@@ -297,3 +299,31 @@ async function logJSON(guild, type, data) {
     return await logsChannel.send(message);
   }
 }
+
+const app = express();
+
+app.use(cors());
+
+app.get("/", async (request, response) => {
+  response.send({
+    message: "Hello, World!",
+  });
+});
+
+app.get("/stats", async (request, response) => {
+  const statsJson = {
+    guilds: discord.guilds.cache.size,
+    channels: discord.channels.cache.size,
+    users: discord.users.cache.size,
+  };
+
+  if (process.env.MONGODB_URI)
+    statsJson.globalEventsLogged =
+      (await findOne("stats", { key: "GLOBAL" }))?.eventsLogged || 0;
+
+  response.send(statsJson);
+});
+
+app.listen(process.env.WEB_API_PORT || 3000, () => {
+  console.log(`Listening on port ${process.env.WEB_API_PORT || 3000}!`);
+});
