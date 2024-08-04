@@ -20,11 +20,7 @@ const discord = new Client({
 });
 
 discord.on(Events.ClientReady, async () => {
-  const gitCommitHash = execSync("git rev-parse --short HEAD")
-    .toString()
-    .trim();
-
-  discord.user.setActivity(`/help | v${gitCommitHash}`, {
+  discord.user.setActivity(`/help`, {
     type: ActivityType.Listening,
   });
 
@@ -34,7 +30,6 @@ discord.on(Events.ClientReady, async () => {
       "\n```json\n" +
       JSON.stringify(
         {
-          gitCommitHash,
           guilds: discord.guilds.cache.size,
           users: discord.guilds.cache.reduce(
             (accumulator, guild) => accumulator + guild.memberCount,
