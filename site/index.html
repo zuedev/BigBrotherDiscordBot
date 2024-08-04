@@ -70,7 +70,7 @@
     const statsOutput = document.getElementById("statsOutput");
 
     const updateStatsLoop = () => {
-      fetch("https://bigbrotherapi.zue.dev/stats")
+      fetch("https://bigbrother-api.baldur.zue.dev/stats")
         .then((res) => res.json())
         .then((data) => {
           statsOutput.innerHTML = hljs.highlight(
