@@ -136,13 +136,14 @@ discord.on(Events.Error, (error) => {
   Events.WebhooksUpdate,
 ].forEach((event) => {
   discord.on(event, async (...args) => {
-    if (process.env.MONGODB_URI)
-      await updateOne(
-        "stats",
-        { key: "GLOBAL" },
-        { $inc: { eventsLogged: 1 } },
-        { upsert: true }
-      );
+    // TODO: sync to local state then send to db on interval
+    // if (process.env.MONGODB_URI)
+    //   await updateOne(
+    //     "stats",
+    //     { key: "GLOBAL" },
+    //     { $inc: { eventsLogged: 1 } },
+    //     { upsert: true }
+    //   );
 
     // do we have a guild key in the args? Check recursively to support nested args
     let guild = false;
@@ -170,22 +171,23 @@ discord.on(Events.Error, (error) => {
       // also fetch guild owner
       const guildOwner = await guild.fetchOwner();
 
-      await updateOne(
-        "stats",
-        { key: `guild_${guild.id}` },
-        {
-          $inc: { eventsLogged: 1 },
-          $set: {
-            lastKnown: {
-              guildName: guild.name,
-              guildMemberCount: guild.memberCount,
-              guildOwnerId: guildOwner.id,
-              guildOwnerTag: guildOwner.user.tag,
-            },
-          },
-        },
-        { upsert: true }
-      );
+      // TODO: sync to local state then send to db on interval
+      // await updateOne(
+      //   "stats",
+      //   { key: `guild_${guild.id}` },
+      //   {
+      //     $inc: { eventsLogged: 1 },
+      //     $set: {
+      //       lastKnown: {
+      //         guildName: guild.name,
+      //         guildMemberCount: guild.memberCount,
+      //         guildOwnerId: guildOwner.id,
+      //         guildOwnerTag: guildOwner.user.tag,
+      //       },
+      //     },
+      //   },
+      //   { upsert: true }
+      // );
     }
 
     for (const arg of args) {
