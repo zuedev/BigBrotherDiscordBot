@@ -11,6 +11,8 @@ const DB_NAME = "BigBrotherBot";
  */
 export async function connect() {
   const mongo = new MongoClient(process.env.MONGODB_URI, {
+    retryWrites: true,
+    writeConcern: "majority",
     serverApi: {
       version: ServerApiVersion.v1,
       strict: true,
