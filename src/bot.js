@@ -148,16 +148,18 @@ discord.on(Events.Error, (error) => {
     // do we have a guild key in the args? Check recursively to support nested args
     let guild = false;
 
-    for (const arg of args) {
-      if (arg.guild) {
-        guild = arg.guild;
-        break;
-      }
-
-      for (const key in arg) {
-        if (arg[key] && arg[key].guild) {
-          guild = arg[key].guild;
+    if (args) {
+      for (const arg of args) {
+        if (arg.guild) {
+          guild = arg.guild;
           break;
+        }
+
+        for (const key in arg) {
+          if (arg[key] && arg[key].guild) {
+            guild = arg[key].guild;
+            break;
+          }
         }
       }
     }
