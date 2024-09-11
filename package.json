@@ -8,7 +8,8 @@
     "mongodb": "^6.3.0"
   },
   "scripts": {
-    "start": "node source/main.js",
-    "dev": "node --watch source/main.js"
+    "register": "node src/register-commands.js",
+    "start": "node src/bot.js",
+    "register+start": "npm run register && npm run start"
   }
 }
