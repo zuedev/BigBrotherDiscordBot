@@ -1,5 +1,7 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 
+const DB_NAME = "BigBrotherBot";
+
 /**
  * Connects to the database.
  * This is called automatically by other functions.
@@ -9,6 +11,7 @@ import { MongoClient, ServerApiVersion } from "mongodb";
  */
 export async function connect() {
   const mongo = new MongoClient(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
     serverApi: {
       version: ServerApiVersion.v1,
       strict: true,
@@ -16,7 +19,7 @@ export async function connect() {
     }
   });
 
-  await mongo.connect().db("BigBrotherBot");
+  await mongo.connect();
 
   return mongo;
 }
@@ -32,7 +35,7 @@ export async function connect() {
 export async function findOne(table, filter) {
   const mongo = await connect();
 
-  const data = await mongo.collection(table).findOne(filter);
+  const data = await mongo.db(DB_NAME).collection(table).findOne(filter);
 
   await mongo.close();
 
@@ -52,6 +55,7 @@ export async function updateOne(table, filter, update, options) {
   const mongo = await connect();
 
   const data = await mongo
+    .db(DB_NAME)
     .collection(table)
     .updateOne(filter, update, options);
 
