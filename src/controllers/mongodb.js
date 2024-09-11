@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, ServerApiVersion } from "mongodb";
 
 /**
  * Connects to the database.
@@ -8,9 +8,15 @@ import { MongoClient } from "mongodb";
  * @returns {Promise<MongoClient>} The connected MongoDB client
  */
 export async function connect() {
-  const mongo = new MongoClient(process.env.MONGODB_URI);
+  const mongo = new MongoClient(process.env.MONGODB_URI, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
 
-  await mongo.connect();
+  await mongo.connect().db("BigBrotherBot");
 
   return mongo;
 }
@@ -26,7 +32,7 @@ export async function connect() {
 export async function findOne(table, filter) {
   const mongo = await connect();
 
-  const data = await mongo.db().collection(table).findOne(filter);
+  const data = await mongo.collection(table).findOne(filter);
 
   await mongo.close();
 
@@ -46,7 +52,6 @@ export async function updateOne(table, filter, update, options) {
   const mongo = await connect();
 
   const data = await mongo
-    .db()
     .collection(table)
     .updateOne(filter, update, options);
 
