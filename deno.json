@@ -1,0 +1,6 @@
+{
+    "tasks": {
+        "start": "deno --allow-all --env-file main.js",
+        "test": "deno test --allow-env --parallel"
+    }
+}
